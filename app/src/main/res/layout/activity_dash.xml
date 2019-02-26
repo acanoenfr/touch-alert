@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dash"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Dash">
@@ -50,7 +51,7 @@
         />
 
     <ImageButton
-        android:id="@+id/catastrophe"
+        android:id="@+id/cata"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
