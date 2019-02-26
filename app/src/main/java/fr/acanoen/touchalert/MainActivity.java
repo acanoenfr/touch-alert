@@ -34,29 +34,23 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         }
 
         @Override
-        public boolean onNavigationItemSelected (@NonNull MenuItem item){
+        public boolean onNavigationItemSelected (@NonNull MenuItem item) {
             Fragment fragment = null;
 
-        switch (item.getItemId()) {
-            case R.id.navigation_home:
-                fragment = new BoardFragment();
-                break;
-            case R.id.navigation_dashboard:
-                fragment = new AlertFragment();
-                break;
-            case R.id.navigation_notifications:
-                fragment = new NotificationFragment();
-                break;
+            switch (item.getItemId()) {
+                case R.id.navigation_home:
+                    fragment = new BoardFragment();
+                    break;
+                case R.id.navigation_dashboard:
+                    fragment = new AlertFragment();
+                    break;
+                case R.id.navigation_notifications:
+                    fragment = new NotificationFragment();
+                    break;
+            }
         }
 
-        @Override
-        protected void onResume () {
-            super.onResume();
-        }
-
-    @Override
     public void onFragmentInteraction(Uri uri) {
 
-        }
     }
 }
