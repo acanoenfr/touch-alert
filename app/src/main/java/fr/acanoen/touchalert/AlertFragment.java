@@ -7,6 +7,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+
 
 
 /**
@@ -26,6 +32,10 @@ public class AlertFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    //composants de l'interface
+    private ImageButton event, danger, solde, medical, cata, more;
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,7 +74,92 @@ public class AlertFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_alert, container, false);
+        View view = inflater.inflate(R.layout.fragment_alert, container, false);
+
+        view.findViewById(R.id.event);
+        event.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // traitement, envoie l'evenement et la geolocalisation
+                sendGeo();
+            }
+        });
+
+        //le bouton danger
+        view.findViewById(R.id.danger);
+        danger.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //localisation
+                sendGeo();
+            }
+        });
+
+        //le bouton solde
+        view.findViewById(R.id.solde);
+        solde.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // localisation methode
+                sendGeo();
+            }
+        });
+
+        //le bouton medical
+        view.findViewById(R.id.medical);
+        medical.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //localisation methode
+                sendGeo();
+            }
+        });
+
+        //le bouton cata
+        view.findViewById(R.id.cata);
+        cata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //localisation methode
+                sendGeo();
+            }
+        });
+
+        //le bouton more
+        view.findViewById(R.id.more);
+        more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendGeo();
+            }
+        });
+
+        return view;
+    }
+
+
+    // envoie la localisation
+    private void sendGeo() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            // TODO
+        } else {
+            // Show rationale and request permission.
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_LOCATION);
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+
+            }
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

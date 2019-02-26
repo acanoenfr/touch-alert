@@ -46,7 +46,7 @@
         />
 
     <ImageButton
-        android:id="@+id/catastrophe"
+        android:id="@+id/cata"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
