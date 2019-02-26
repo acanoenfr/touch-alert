@@ -1,6 +1,10 @@
 package fr.acanoen.touchalert;
 
 import android.content.Context;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import static android.content.Context.LOCATION_SERVICE;
 
 
 /**
@@ -23,7 +28,7 @@ import android.support.v4.content.ContextCompat;
  * Use the {@link AlertFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AlertFragment extends Fragment {
+public class AlertFragment extends Fragment implements LocationListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -33,6 +38,8 @@ public class AlertFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+
+    private String type;
     //composants de l'interface
     private ImageButton event, danger, solde, medical, cata, more;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
@@ -76,61 +83,61 @@ public class AlertFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_alert, container, false);
 
-        view.findViewById(R.id.event);
+        event = view.findViewById(R.id.event);
         event.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // traitement, envoie l'evenement et la geolocalisation
-                sendGeo();
+                sendGeo("event");
             }
         });
 
         //le bouton danger
-        view.findViewById(R.id.danger);
+        danger = view.findViewById(R.id.danger);
         danger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //localisation
-                sendGeo();
+                sendGeo("danger");
             }
         });
 
         //le bouton solde
-        view.findViewById(R.id.solde);
+       solde = view.findViewById(R.id.solde);
         solde.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // localisation methode
-                sendGeo();
+                sendGeo("solde");
             }
         });
 
         //le bouton medical
-        view.findViewById(R.id.medical);
+       medical = view.findViewById(R.id.medical);
         medical.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //localisation methode
-                sendGeo();
+                sendGeo("event");
             }
         });
 
         //le bouton cata
-        view.findViewById(R.id.cata);
+       cata = view.findViewById(R.id.cata);
         cata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //localisation methode
-                sendGeo();
+                sendGeo("event");
             }
         });
 
         //le bouton more
-        view.findViewById(R.id.more);
+        more = view.findViewById(R.id.more);
         more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendGeo();
+                sendGeo("event");
             }
         });
 
@@ -139,16 +146,30 @@ public class AlertFragment extends Fragment {
 
 
     // envoie la localisation
-    private void sendGeo() {
-        /*if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+    private void sendGeo(String typeEvent) {
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            // TODO
+
+            // Getting LocationManager object from System Service LOCATION_SERVICE
+            LocationManager locationManager = (LocationManager) this.getActivity().getSystemService(LOCATION_SERVICE);
+
+            // Creating a criteria object to retrieve provider
+            Criteria criteria = new Criteria();
+
+            // Getting the name of the best provider
+            String provider = locationManager.getBestProvider(criteria, true);
+
+            //Request location updates:
+            this.type = typeEvent;
+            locationManager.requestLocationUpdates(provider, 400, 1, this);
+
+
         } else {
             // Show rationale and request permission.
             ActivityCompat.requestPermissions(this.getActivity(),
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
-        }*/
+        }
 
     }
 
@@ -157,7 +178,7 @@ public class AlertFragment extends Fragment {
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
-                sendGeo();
+                sendGeo("event");
             }
         }
     }
@@ -184,6 +205,46 @@ public class AlertFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        location.getLatitude();
+        String type = this.type;
+        sendToServer(this.type, location);
+    }
+
+    private void sendToServer(String type, Location location) {
+        public static final MediaType JSON
+                = MediaType.get("application/json; charset=utf-8");
+
+        OkHttpClient client = new OkHttpClient();
+
+        String post(String url, String json) throws IOException {
+            RequestBody body = RequestBody.create(JSON, json);
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+            try (Response response = client.newCall(request).execute()) {
+                return response.body().string();
+            }
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 
     /**
