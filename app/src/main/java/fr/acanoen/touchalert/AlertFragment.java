@@ -140,7 +140,7 @@ public class AlertFragment extends Fragment {
 
     // envoie la localisation
     private void sendGeo() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             // TODO
         } else {
@@ -148,7 +148,7 @@ public class AlertFragment extends Fragment {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
-        }
+        }*/
 
     }
 
