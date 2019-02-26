@@ -19,23 +19,23 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(this);
-    }
-
-    private boolean loadFragment(Fragment fragment) {
-        //switching fragment
-        if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit();
-            return true;
         }
-        return false;
-    }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Fragment fragment = null;
+        private boolean loadFragment (Fragment fragment){
+            //switching fragment
+            if (fragment != null) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .commit();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onNavigationItemSelected (@NonNull MenuItem item){
+            Fragment fragment = null;
 
         switch (item.getItemId()) {
             case R.id.navigation_home:
@@ -48,16 +48,15 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 fragment = new NotificationFragment();
                 break;
         }
-        return loadFragment(fragment);
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
+        @Override
+        protected void onResume () {
+            super.onResume();
+        }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+        }
     }
 }
