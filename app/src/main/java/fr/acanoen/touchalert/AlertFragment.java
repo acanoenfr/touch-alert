@@ -140,12 +140,16 @@ public class AlertFragment extends Fragment {
 
     // envoie la localisation
     private void sendGeo() {
+<<<<<<< Updated upstream
         /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+=======
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+>>>>>>> Stashed changes
                 == PackageManager.PERMISSION_GRANTED) {
             // TODO
         } else {
             // Show rationale and request permission.
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(this.getActivity(),
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
         }*/
@@ -157,7 +161,7 @@ public class AlertFragment extends Fragment {
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
-
+                sendGeo();
             }
         }
     }

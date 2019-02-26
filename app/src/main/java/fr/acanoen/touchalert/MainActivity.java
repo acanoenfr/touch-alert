@@ -19,20 +19,21 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(this);
-        }
+    }
 
-        private boolean loadFragment (Fragment fragment){
-            //switching fragment
-            if (fragment != null) {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
-                        .commit();
-                return true;
-            }
-            return false;
+    private boolean loadFragment(Fragment fragment) {
+        //switching fragment
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
+            return true;
         }
+        return false;
+    }
 
+<<<<<<< Updated upstream
         @Override
         public boolean onNavigationItemSelected (@NonNull MenuItem item) {
             Fragment fragment = null;
@@ -49,8 +50,34 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     break;
             }
         }
+=======
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Fragment fragment = null;
+
+        switch (item.getItemId()) {
+            case R.id.navigation_home:
+                fragment = new BoardFragment();
+                break;
+            case R.id.navigation_dashboard:
+                fragment = new AlertFragment();
+                break;
+            case R.id.navigation_notifications:
+                fragment = new NotificationFragment();
+                break;
+        }
+
+        return loadFragment(fragment);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+>>>>>>> Stashed changes
 
     public void onFragmentInteraction(Uri uri) {
 
     }
 }
+
