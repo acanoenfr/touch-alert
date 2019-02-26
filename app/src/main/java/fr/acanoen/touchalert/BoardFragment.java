@@ -119,14 +119,6 @@ public class BoardFragment extends Fragment {
         mListener = null;
     }
 
-<<<<<<< Updated upstream
-=======
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map= googleMap;
-    }
-
->>>>>>> Stashed changes
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

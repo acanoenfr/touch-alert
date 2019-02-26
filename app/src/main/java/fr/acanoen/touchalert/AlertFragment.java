@@ -140,11 +140,7 @@ public class AlertFragment extends Fragment {
 
     // envoie la localisation
     private void sendGeo() {
-<<<<<<< Updated upstream
-        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-=======
-        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
->>>>>>> Stashed changes
+        /*if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             // TODO
         } else {
