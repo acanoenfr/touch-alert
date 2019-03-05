@@ -17,6 +17,14 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import java.io.IOException;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 import static android.content.Context.LOCATION_SERVICE;
 
 
@@ -33,6 +41,9 @@ public class AlertFragment extends Fragment implements LocationListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    public static final MediaType JSON
+            = MediaType.get("application/json; charset=utf-8");
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -211,25 +222,26 @@ public class AlertFragment extends Fragment implements LocationListener {
     public void onLocationChanged(Location location) {
         location.getLatitude();
         String type = this.type;
-        sendToServer(this.type, location);
+        try {
+            sendToServer(this.type, location);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void sendToServer(String type, Location location) {
-        public static final MediaType JSON
-                = MediaType.get("application/json; charset=utf-8");
+    private String sendToServer(String type, Location location) throws IOException {
+
 
         OkHttpClient client = new OkHttpClient();
 
-        String post(String url, String json) throws IOException {
-            RequestBody body = RequestBody.create(JSON, json);
+            RequestBody body = RequestBody.create(JSON, "{}");
             Request request = new Request.Builder()
-                    .url(url)
+                    .url("https://b836d602.ngrok.io/")
                     .post(body)
                     .build();
             try (Response response = client.newCall(request).execute()) {
                 return response.body().string();
             }
-        }
     }
 
     @Override
