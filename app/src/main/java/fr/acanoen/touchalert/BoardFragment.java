@@ -1,6 +1,7 @@
 package fr.acanoen.touchalert;
 
 import android.Manifest;
+import android.location.Location;
 import android.location.LocationManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
