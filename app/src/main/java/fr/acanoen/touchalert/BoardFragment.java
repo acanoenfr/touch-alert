@@ -2,6 +2,7 @@ package fr.acanoen.touchalert;
 
 import android.Manifest;
 import android.location.LocationManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.content.Context;
 import android.net.Uri;
@@ -31,11 +32,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Use the {@link BoardFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BoardFragment extends Fragment {
+public class BoardFragment extends Fragment implements OnMapReadyCallback {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    // private static final String ARG_PARAM1 = "param1";
+    // private static final String ARG_PARAM2 = "param2";
 
     private MapFragment mapFragment;
     private GoogleMap map;
@@ -59,57 +60,30 @@ public class BoardFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment BoardFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static BoardFragment newInstance(String param1, String param2) {
+    public static BoardFragment newInstance() {
         BoardFragment fragment = new BoardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        try {
-            locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                    googleMap.clear();
-                    LatLng marker = new LatLng(19.33978502, -99.19086277);
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker, 15));
-                    googleMap.addMarker(new MarkerOptions().title("Test Marker").position(marker));
-                }
-            });
-        } catch (NullPointerException e) {
-            //
-        }
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_board, container, false);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_board, container, false);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        mapFragment.getMapAsync(this);
+        return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.clear();
     }
 
     @Override
@@ -142,5 +116,12 @@ public class BoardFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
+        }
     }
 }
