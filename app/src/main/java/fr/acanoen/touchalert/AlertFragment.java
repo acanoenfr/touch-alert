@@ -8,6 +8,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,9 @@ import android.support.v4.content.ContextCompat;
 
 import java.io.IOException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -114,7 +118,7 @@ public class AlertFragment extends Fragment implements LocationListener {
         });
 
         //le bouton solde
-       solde = view.findViewById(R.id.solde);
+        solde = view.findViewById(R.id.solde);
         solde.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,7 +128,7 @@ public class AlertFragment extends Fragment implements LocationListener {
         });
 
         //le bouton medical
-       medical = view.findViewById(R.id.medical);
+        medical = view.findViewById(R.id.medical);
         medical.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,7 +138,7 @@ public class AlertFragment extends Fragment implements LocationListener {
         });
 
         //le bouton cata
-       cata = view.findViewById(R.id.cata);
+        cata = view.findViewById(R.id.cata);
         cata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -229,19 +233,39 @@ public class AlertFragment extends Fragment implements LocationListener {
         }
     }
 
-    private String sendToServer(String type, Location location) throws IOException {
-
+    //appel l'API
+    private void sendToServer(String type, Location location) throws IOException {
 
         OkHttpClient client = new OkHttpClient();
 
-            RequestBody body = RequestBody.create(JSON, "{}");
-            Request request = new Request.Builder()
-                    .url("https://b836d602.ngrok.io/")
-                    .post(body)
-                    .build();
-            try (Response response = client.newCall(request).execute()) {
-                return response.body().string();
+        String url = "https://dev.acanoen.fr/touchalert/public/api/alert";
+
+        RequestBody body =  new FormBody.Builder()
+                .add("name", "Alex")
+                .add("longitude", "45.747473")
+                .add("latitude", "4.838784")
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    final String myResponse = response.body().string();
+                    Log.d("Rep", myResponse);
+
+                }
+            }
+        });
     }
 
     @Override
