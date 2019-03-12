@@ -172,11 +172,18 @@ public class AlertFragment extends Fragment implements LocationListener {
             Criteria criteria = new Criteria();
 
             // Getting the name of the best provider
-            String provider = locationManager.getBestProvider(criteria, true);
+           // String provider = locationManager.getBestProvider(criteria, true);
 
             //Request location updates:
             this.type = typeEvent;
-            locationManager.requestLocationUpdates(provider, 400, 1, this);
+            locationManager.requestLocationUpdates("network", 20, 1, this);
+            Location location = locationManager.getLastKnownLocation("network");
+            try {
+                sendToServer(type, location);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
 
 
         } else {
@@ -224,13 +231,7 @@ public class AlertFragment extends Fragment implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        location.getLatitude();
-        String type = this.type;
-        try {
-            sendToServer(this.type, location);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     //appel l'API
