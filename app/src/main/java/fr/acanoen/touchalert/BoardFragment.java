@@ -1,5 +1,7 @@
 package fr.acanoen.touchalert;
 
+import android.Manifest;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.content.Context;
 import android.net.Uri;
@@ -37,6 +39,10 @@ public class BoardFragment extends Fragment {
 
     private MapFragment mapFragment;
     private GoogleMap map;
+    private LocationManager locationManager;
+
+    private Double longitude;
+    private Double latitude;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -72,11 +78,15 @@ public class BoardFragment extends Fragment {
         super.onCreate(savedInstanceState);
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         try {
+            locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
             mapFragment.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(GoogleMap googleMap) {
                     googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                     googleMap.clear();
+                    LatLng marker = new LatLng(19.33978502, -99.19086277);
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker, 15));
+                    googleMap.addMarker(new MarkerOptions().title("Test Marker").position(marker));
                 }
             });
         } catch (NullPointerException e) {
