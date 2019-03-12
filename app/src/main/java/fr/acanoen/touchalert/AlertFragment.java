@@ -241,8 +241,7 @@ public class AlertFragment extends Fragment implements LocationListener {
         String url = "https://dev.acanoen.fr/touchalert/public/api/alert";
 
         RequestBody body =  new FormBody.Builder()
-                .add("name", "Alex")
-                .add("type", type)
+                .add("name", type)
                 .add("longitude", location.getLongitude()+"")
                 .add("latitude", location.getLatitude() + "")
                 .build();
