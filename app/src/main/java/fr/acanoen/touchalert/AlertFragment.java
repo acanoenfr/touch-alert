@@ -242,8 +242,9 @@ public class AlertFragment extends Fragment implements LocationListener {
 
         RequestBody body =  new FormBody.Builder()
                 .add("name", "Alex")
-                .add("longitude", "45.747473")
-                .add("latitude", "4.838784")
+                .add("type", type)
+                .add("longitude", location.getLongitude()+"")
+                .add("latitude", location.getLatitude() + "")
                 .build();
         Request request = new Request.Builder()
                 .url(url)
