@@ -103,7 +103,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 // traitement, envoie l'evenement et la geolocalisation
-                sendGeo("event");
+                sendGeo("Evénement");
             }
         });
 
@@ -113,7 +113,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 //localisation
-                sendGeo("danger");
+                sendGeo("Danger");
             }
         });
 
@@ -123,7 +123,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 // localisation methode
-                sendGeo("solde");
+                sendGeo("Promotions");
             }
         });
 
@@ -133,7 +133,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 //localisation methode
-                sendGeo("event");
+                sendGeo("Santé");
             }
         });
 
@@ -143,7 +143,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 //localisation methode
-                sendGeo("event");
+                sendGeo("Catastrophe");
             }
         });
 
@@ -152,7 +152,7 @@ public class AlertFragment extends Fragment implements LocationListener {
         more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendGeo("event");
+                sendGeo("Autre");
             }
         });
 
@@ -241,8 +241,7 @@ public class AlertFragment extends Fragment implements LocationListener {
         String url = "https://dev.acanoen.fr/touchalert/public/api/alert";
 
         RequestBody body =  new FormBody.Builder()
-                .add("name", "Alex")
-                .add("type", type)
+                .add("name", type)
                 .add("longitude", location.getLongitude()+"")
                 .add("latitude", location.getLatitude() + "")
                 .build();
