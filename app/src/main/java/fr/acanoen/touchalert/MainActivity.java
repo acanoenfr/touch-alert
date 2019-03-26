@@ -15,13 +15,6 @@ import fr.acanoen.touchalert.fragment.NotificationFragment;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, BoardFragment.OnFragmentInteractionListener, AlertFragment.OnFragmentInteractionListener, NotificationFragment.OnFragmentInteractionListener {
 
-import fr.acanoen.touchalert.fragment.AlertFragment;
-import fr.acanoen.touchalert.fragment.BoardFragment;
-import fr.acanoen.touchalert.fragment.NotificationFragment;
-
-public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, BoardFragment.OnFragmentInteractionListener, AlertFragment.OnFragmentInteractionListener,
-        NotificationFragment.OnFragmentInteractionListener {
-
     private GoogleMap map;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
