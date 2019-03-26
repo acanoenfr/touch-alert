@@ -8,12 +8,21 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.GoogleMap;
 import fr.acanoen.touchalert.fragment.AlertFragment;
 import fr.acanoen.touchalert.fragment.BoardFragment;
 import fr.acanoen.touchalert.fragment.NotificationFragment;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, BoardFragment.OnFragmentInteractionListener, AlertFragment.OnFragmentInteractionListener, NotificationFragment.OnFragmentInteractionListener {
 
+import fr.acanoen.touchalert.fragment.AlertFragment;
+import fr.acanoen.touchalert.fragment.BoardFragment;
+import fr.acanoen.touchalert.fragment.NotificationFragment;
+
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, BoardFragment.OnFragmentInteractionListener, AlertFragment.OnFragmentInteractionListener,
+        NotificationFragment.OnFragmentInteractionListener {
+
+    private GoogleMap map;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +61,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                     fragment = new NotificationFragment();
                     break;
             }
+            return
+            loadFragment(fragment);
 
-        return loadFragment(fragment);
+
     }
 
     @Override
@@ -64,5 +75,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+
 }
 
