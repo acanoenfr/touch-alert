@@ -2,6 +2,8 @@ package fr.acanoen.touchalert;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -125,14 +127,14 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.clear();
-        Location l = new Location("Default");
+     /*   Location l = new Location("Default");
         if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             l = locationManager.getLastKnownLocation("network");
         }
         LatLng latLng = new LatLng(l.getLatitude(), l.getLongitude());
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
-        map.animateCamera(cameraUpdate);
+        map.animateCamera(cameraUpdate);*/
         new getAlerts().execute("https://dev.acanoen.fr/touchalert/public/api/alert");
 
     }
@@ -271,9 +273,30 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
                     Double longitude = Double.parseDouble(alert.getString("longitude"));
                     Double latitude = Double.parseDouble(alert.getString("latitude"));
                     LatLng location = new LatLng(latitude,longitude);
+                    String type= alert.getString("type");
+                    int icon= R.mipmap.markerautre;
+                    switch(type){
+                        case "Evénement":
+                            icon=R.mipmap.markerfireworkslayer;
+                            break;
+                        case "Danger":
+                            icon=R.mipmap.markerdangerlayer;
+                            break;
+                        case "Santé":
+                            icon=R.mipmap.markeremergencylayer;
+                            break;
+                        case "Promotions":
+                            icon=R.mipmap.markersoldeslayer;
+                            break;
+                        case "Catastrophe":
+                            icon=R.mipmap.testrrrr;
+                            break;
+                        case "Autre":
+                            icon= R.mipmap.markerautre;
+                    }
+                    int b = R.mipmap.markerfireworkslayer;
                     String title= alert.getString("name");
-                    map.addMarker(new MarkerOptions().title(title).position(location).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher)));
-
+                    map.addMarker(new MarkerOptions().title(title).position(location).icon(BitmapDescriptorFactory.fromResource(icon)));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -289,7 +312,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
         }
     }
 
-    private String downloadUrl(URL url) throws IOException {
+        private String downloadUrl(URL url) throws IOException {
         InputStream stream = null;
         HttpsURLConnection connection = null;
         String result = null;
