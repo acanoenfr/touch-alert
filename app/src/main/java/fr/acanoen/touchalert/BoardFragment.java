@@ -6,6 +6,9 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.content.Context;
@@ -13,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,8 +30,30 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,7 +73,6 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
     private GoogleMap map;
     private Criteria criteria;
     private LocationManager locationManager;
-
     private Double longitude;
     private Double latitude;
 
@@ -97,8 +122,8 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.clear();
-        // LatLng latLng = new LatLng(latitude, longitude);
-        // map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        new getAlerts().execute("https://dev.acanoen.fr/touchalert/public/api/alert");
+
     }
 
     @Override
@@ -160,4 +185,155 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
             mListener.onFragmentInteraction(uri);
         }
     }
+
+    /**
+     * Implementation of AsyncTask designed to fetch data from the network.
+     */
+    private class getAlerts extends AsyncTask<String, Integer, getAlerts.Result> {
+
+       /* private DownloadCallback<String> mCallback;
+        DownloadTask(DownloadCallback<String> callback) {
+            setCallback(callback);
+        }
+        void setCallback(DownloadCallback<String> callback) {
+            mCallback = callback;
+        }*/
+
+        /**
+         * Wrapper class that serves as a union of a result value and an exception. When the download
+         * task has completed, either the result value or exception can be a non-null value.
+         * This allows you to pass exceptions to the UI thread that were thrown during doInBackground().
+         */
+        class Result {
+            public String mResultValue;
+            public Exception mException;
+            public Result(String resultValue) {
+                mResultValue = resultValue;
+            }
+            public Result(Exception exception) {
+                mException = exception;
+            }
+        }
+
+        /**
+         * Cancel background network operation if we do not have network connectivity.
+         */
+        @Override
+        protected void onPreExecute() {
+        }
+
+        /**
+         * Defines work to perform on the background thread.
+         */
+        @Override
+        protected getAlerts.Result doInBackground(String... urls) {
+            Result result = null;
+            if (!isCancelled() && urls != null && urls.length > 0) {
+                String urlString = urls[0];
+                try {
+                    URL url = new URL(urlString);
+                    String resultString = downloadUrl(url);
+                    if (resultString != null) {
+                        result = new Result(resultString);
+                    } else {
+                        throw new IOException("No response received.");
+                    }
+                } catch(Exception e) {
+                    result = new Result(e);
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Updates the DownloadCallback with the result.
+         */
+        @Override
+        protected void onPostExecute(Result result) {
+
+            JSONArray alerts= null;
+            try {
+                    alerts = new JSONArray(result.mResultValue);
+                for(int i=0; i<alerts.length();i++) {
+                    JSONObject alert = alerts.getJSONObject(i);
+                    Double longitude = Double.parseDouble(alert.getString("longitude"));
+                    Double latitude = Double.parseDouble(alert.getString("latitude"));
+                    LatLng location = new LatLng(latitude,longitude);
+                    String title= alert.getString("name");
+                    map.addMarker(new MarkerOptions().title(title).position(location).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher)));
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        /**
+         * Override to add special behavior for cancelled AsyncTask.
+         */
+        @Override
+        protected void onCancelled(Result result) {
+        }
+    }
+
+    private String downloadUrl(URL url) throws IOException {
+        InputStream stream = null;
+        HttpsURLConnection connection = null;
+        String result = null;
+        try {
+            connection = (HttpsURLConnection) url.openConnection();
+            // Timeout for reading InputStream arbitrarily set to 3000ms.
+            connection.setReadTimeout(3000);
+            // Timeout for connection.connect() arbitrarily set to 3000ms.
+            connection.setConnectTimeout(3000);
+            // For this use case, set HTTP method to GET.
+            connection.setRequestMethod("GET");
+            // Already true by default but setting just in case; needs to be true since this request
+            // is carrying an input (response) body.
+            connection.setDoInput(true);
+            // Open communications link (network traffic occurs here).
+            connection.connect();
+         //   publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpsURLConnection.HTTP_OK) {
+                throw new IOException("HTTP error code: " + responseCode);
+            }
+            // Retrieve the response body as an InputStream.
+            stream = connection.getInputStream();
+            if (stream != null) {
+               result = readStream(stream, 5000);
+            }
+        } finally {
+            // Close Stream and disconnect HTTPS connection.
+            if (stream != null) {
+                stream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return result;
+    }
+    /**
+     * Converts the contents of an InputStream to a String.
+     */
+    public String readStream(InputStream stream, int maxReadSize)
+            throws IOException, UnsupportedEncodingException {
+        Reader reader = null;
+        reader = new InputStreamReader(stream, "UTF-8");
+        char[] rawBuffer = new char[maxReadSize];
+        int readSize;
+        StringBuffer buffer = new StringBuffer();
+        while (((readSize = reader.read(rawBuffer)) != -1) && maxReadSize > 0) {
+            if (readSize > maxReadSize) {
+                readSize = maxReadSize;
+            }
+            buffer.append(rawBuffer, 0, readSize);
+            maxReadSize -= readSize;
+        }
+        return buffer.toString();
+    }
+
+
 }
