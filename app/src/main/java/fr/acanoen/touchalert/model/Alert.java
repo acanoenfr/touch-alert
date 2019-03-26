@@ -1,4 +1,4 @@
-package fr.acanoen.touchalert;
+package fr.acanoen.touchalert.model;
 
 public class Alert {
 

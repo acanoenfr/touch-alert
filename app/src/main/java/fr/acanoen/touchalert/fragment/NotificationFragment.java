@@ -1,40 +1,23 @@
-package fr.acanoen.touchalert;
+package fr.acanoen.touchalert.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
-import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,48 +29,45 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import fr.acanoen.touchalert.model.Alert;
+import fr.acanoen.touchalert.R;
+import fr.acanoen.touchalert.recycler.RecyclerViewAdapter;
+
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link BoardFragment.OnFragmentInteractionListener} interface
+ * {@link NotificationFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link BoardFragment#newInstance} factory method to
+ * Use the {@link NotificationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BoardFragment extends Fragment implements OnMapReadyCallback, LocationListener {
+public class NotificationFragment extends Fragment implements LocationListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    // private static final String ARG_PARAM1 = "param1";
-    // private static final String ARG_PARAM2 = "param2";
 
-    private MapFragment mapFragment;
-    private GoogleMap map;
+    private Location locationUser;
     private Criteria criteria;
     private LocationManager locationManager;
-    private Double longitude;
-    private Double latitude;
-    private Location locationUser;
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private String provider;
 
+    private RecyclerView recyclerView;
+    private List<Alert> alertList = new ArrayList<>();
+
+    private TextView textView;
+
+    // private RecyclerView mRecyclerView;
 
     private OnFragmentInteractionListener mListener;
 
-    public BoardFragment() {
+    private RecyclerViewAdapter recyclerViewAdapter;
+
+    public NotificationFragment() {
         // Required empty public constructor
     }
 
@@ -95,18 +75,23 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment BoardFragment.
+     * @return A new instance of fragment NotificationFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static BoardFragment newInstance() {
-        BoardFragment fragment = new BoardFragment();
+    public static NotificationFragment newInstance() {
+        NotificationFragment fragment = new NotificationFragment();
         return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_board, container, false);
+        View view = inflater.inflate(R.layout.fragment_notification, container, false);
         // Inflate the layout for this fragment
         if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -115,26 +100,19 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
             provider = locationManager.getBestProvider(criteria, true);
             locationManager.requestLocationUpdates("network", 400, 1, this);
         }
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        recyclerView = (RecyclerView) view.findViewById(R.id.alertsList);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), alertList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(recyclerViewAdapter);
+        textView = (TextView) view.findViewById(R.id.loader);
         return view;
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        map.clear();
-        Location l = new Location("Default");
-        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            l = locationManager.getLastKnownLocation("network");
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
         }
-        LatLng latLng = new LatLng(l.getLatitude(), l.getLongitude());
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
-        map.animateCamera(cameraUpdate);
-        new getAlerts().execute("https://dev.acanoen.fr/touchalert/public/api/alert");
-
     }
 
     @Override
@@ -156,24 +134,23 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
 
     @Override
     public void onLocationChanged(Location location) {
-        locationUser = location;
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
+        this.locationUser = location;
+        new getAlerts().execute("https://dev.acanoen.fr/touchalert/public/api/alert");
     }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
-
+        //
     }
 
     @Override
     public void onProviderEnabled(String s) {
-
+        //
     }
 
     @Override
     public void onProviderDisabled(String s) {
-
+        //
     }
 
     /**
@@ -191,17 +168,10 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
         void onFragmentInteraction(Uri uri);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     /**
      * Implementation of AsyncTask designed to fetch data from the network.
      */
-    private class getAlerts extends AsyncTask<String, Integer, getAlerts.Result> {
+    private class getAlerts extends AsyncTask<String, Integer, NotificationFragment.getAlerts.Result> {
 
        /* private DownloadCallback<String> mCallback;
         DownloadTask(DownloadCallback<String> callback) {
@@ -238,20 +208,20 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
          * Defines work to perform on the background thread.
          */
         @Override
-        protected getAlerts.Result doInBackground(String... urls) {
-            Result result = null;
+        protected NotificationFragment.getAlerts.Result doInBackground(String... urls) {
+            NotificationFragment.getAlerts.Result result = null;
             if (!isCancelled() && urls != null && urls.length > 0) {
                 String urlString = urls[0];
                 try {
                     URL url = new URL(urlString);
                     String resultString = downloadUrl(url);
                     if (resultString != null) {
-                        result = new Result(resultString);
+                        result = new NotificationFragment.getAlerts.Result(resultString);
                     } else {
                         throw new IOException("No response received.");
                     }
                 } catch(Exception e) {
-                    result = new Result(e);
+                    result = new NotificationFragment.getAlerts.Result(e);
                 }
             }
             return result;
@@ -261,18 +231,53 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
          * Updates the DownloadCallback with the result.
          */
         @Override
-        protected void onPostExecute(Result result) {
+        protected void onPostExecute(NotificationFragment.getAlerts.Result result) {
 
             JSONArray alerts= null;
             try {
-                    alerts = new JSONArray(result.mResultValue);
+                alerts = new JSONArray(result.mResultValue);
                 for(int i=0; i<alerts.length();i++) {
                     JSONObject alert = alerts.getJSONObject(i);
                     Double longitude = Double.parseDouble(alert.getString("longitude"));
                     Double latitude = Double.parseDouble(alert.getString("latitude"));
-                    LatLng location = new LatLng(latitude,longitude);
-                    String title= alert.getString("name");
-                    map.addMarker(new MarkerOptions().title(title).position(location).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher)));
+
+                    Location l = new Location(alert.getString("name"));
+                    l.setLatitude(latitude);
+                    l.setLongitude(longitude);
+                    float distance = locationUser.distanceTo(l);
+
+
+                    switch (alert.getString("type")) {
+
+                        case "Danger":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_danger));
+                            break;
+
+                        case "Evénement":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_fireworks));
+                            break;
+
+                        case "Promotions":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_solde));
+                            break;
+
+                        case "Santé":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_medical));
+                            break;
+
+                        case "Catastrophe":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_tsunami));
+                            break;
+
+                        case "Autre":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_more_horiz_black_24dp));
+                            break;
+
+                    }
+
+
+                    recyclerViewAdapter.notifyDataSetChanged();
+                    textView.setText("Alerte à proximité");
 
                 }
             } catch (JSONException e) {
@@ -285,7 +290,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
          * Override to add special behavior for cancelled AsyncTask.
          */
         @Override
-        protected void onCancelled(Result result) {
+        protected void onCancelled(NotificationFragment.getAlerts.Result result) {
         }
     }
 
@@ -306,7 +311,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
             connection.setDoInput(true);
             // Open communications link (network traffic occurs here).
             connection.connect();
-         //   publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
+            //   publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpsURLConnection.HTTP_OK) {
                 throw new IOException("HTTP error code: " + responseCode);
@@ -314,7 +319,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
             // Retrieve the response body as an InputStream.
             stream = connection.getInputStream();
             if (stream != null) {
-               result = readStream(stream, 5000);
+                result = readStream(stream, 5000);
             }
         } finally {
             // Close Stream and disconnect HTTPS connection.
@@ -346,6 +351,5 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
         }
         return buffer.toString();
     }
-
 
 }
