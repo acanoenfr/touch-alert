@@ -245,7 +245,37 @@ public class NotificationFragment extends Fragment implements LocationListener {
                     l.setLatitude(latitude);
                     l.setLongitude(longitude);
                     float distance = locationUser.distanceTo(l);
-                    alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.mipmap.ic_touch_alert));
+
+
+                    switch (alert.getString("type")) {
+
+                        case "Danger":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_danger));
+                            break;
+
+                        case "Evénement":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_fireworks));
+                            break;
+
+                        case "Promotions":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_solde));
+                            break;
+
+                        case "Santé":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_medical));
+                            break;
+
+                        case "Catastrophe":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_tsunami));
+                            break;
+
+                        case "Autre":
+                            alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.drawable.ic_more_horiz_black_24dp));
+                            break;
+
+                    }
+
+
                     recyclerViewAdapter.notifyDataSetChanged();
                     textView.setText("Alerte à proximité");
 
