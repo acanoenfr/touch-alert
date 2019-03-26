@@ -1,12 +1,39 @@
 package fr.acanoen.touchalert;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 /**
@@ -17,15 +44,16 @@ import android.view.ViewGroup;
  * Use the {@link NotificationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NotificationFragment extends Fragment {
+public class NotificationFragment extends Fragment implements LocationListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Location locationUser;
+    private Criteria criteria;
+    private LocationManager locationManager;
+    private String provider;
+
+    // private RecyclerView mRecyclerView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -37,33 +65,30 @@ public class NotificationFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment NotificationFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static NotificationFragment newInstance(String param1, String param2) {
+    public static NotificationFragment newInstance() {
         NotificationFragment fragment = new NotificationFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+            criteria = new Criteria();
+            provider = locationManager.getBestProvider(criteria, true);
+            locationManager.requestLocationUpdates("network", 400, 1, this);
+        }
         return inflater.inflate(R.layout.fragment_notification, container, false);
     }
 
@@ -91,6 +116,27 @@ public class NotificationFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        this.locationUser = location;
+        new getAlerts().execute("https://dev.acanoen.fr/touchalert/public/api/alert");
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+        //
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+        //
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+        //
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -105,4 +151,158 @@ public class NotificationFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    /**
+     * Implementation of AsyncTask designed to fetch data from the network.
+     */
+    private class getAlerts extends AsyncTask<String, Integer, NotificationFragment.getAlerts.Result> {
+
+       /* private DownloadCallback<String> mCallback;
+        DownloadTask(DownloadCallback<String> callback) {
+            setCallback(callback);
+        }
+        void setCallback(DownloadCallback<String> callback) {
+            mCallback = callback;
+        }*/
+
+        /**
+         * Wrapper class that serves as a union of a result value and an exception. When the download
+         * task has completed, either the result value or exception can be a non-null value.
+         * This allows you to pass exceptions to the UI thread that were thrown during doInBackground().
+         */
+        class Result {
+            public String mResultValue;
+            public Exception mException;
+            public Result(String resultValue) {
+                mResultValue = resultValue;
+            }
+            public Result(Exception exception) {
+                mException = exception;
+            }
+        }
+
+        /**
+         * Cancel background network operation if we do not have network connectivity.
+         */
+        @Override
+        protected void onPreExecute() {
+        }
+
+        /**
+         * Defines work to perform on the background thread.
+         */
+        @Override
+        protected NotificationFragment.getAlerts.Result doInBackground(String... urls) {
+            NotificationFragment.getAlerts.Result result = null;
+            if (!isCancelled() && urls != null && urls.length > 0) {
+                String urlString = urls[0];
+                try {
+                    URL url = new URL(urlString);
+                    String resultString = downloadUrl(url);
+                    if (resultString != null) {
+                        result = new NotificationFragment.getAlerts.Result(resultString);
+                    } else {
+                        throw new IOException("No response received.");
+                    }
+                } catch(Exception e) {
+                    result = new NotificationFragment.getAlerts.Result(e);
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Updates the DownloadCallback with the result.
+         */
+        @Override
+        protected void onPostExecute(NotificationFragment.getAlerts.Result result) {
+
+            JSONArray alerts= null;
+            try {
+                alerts = new JSONArray(result.mResultValue);
+                for(int i=0; i<alerts.length();i++) {
+                    JSONObject alert = alerts.getJSONObject(i);
+                    Double longitude = Double.parseDouble(alert.getString("longitude"));
+                    Double latitude = Double.parseDouble(alert.getString("latitude"));
+
+                    Location l = new Location(alert.getString("name"));
+                    l.setLatitude(latitude);
+                    l.setLongitude(longitude);
+                    float distance = locationUser.distanceTo(l);
+
+                    //
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        /**
+         * Override to add special behavior for cancelled AsyncTask.
+         */
+        @Override
+        protected void onCancelled(NotificationFragment.getAlerts.Result result) {
+        }
+    }
+
+    private String downloadUrl(URL url) throws IOException {
+        InputStream stream = null;
+        HttpsURLConnection connection = null;
+        String result = null;
+        try {
+            connection = (HttpsURLConnection) url.openConnection();
+            // Timeout for reading InputStream arbitrarily set to 3000ms.
+            connection.setReadTimeout(3000);
+            // Timeout for connection.connect() arbitrarily set to 3000ms.
+            connection.setConnectTimeout(3000);
+            // For this use case, set HTTP method to GET.
+            connection.setRequestMethod("GET");
+            // Already true by default but setting just in case; needs to be true since this request
+            // is carrying an input (response) body.
+            connection.setDoInput(true);
+            // Open communications link (network traffic occurs here).
+            connection.connect();
+            //   publishProgress(DownloadCallback.Progress.CONNECT_SUCCESS);
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpsURLConnection.HTTP_OK) {
+                throw new IOException("HTTP error code: " + responseCode);
+            }
+            // Retrieve the response body as an InputStream.
+            stream = connection.getInputStream();
+            if (stream != null) {
+                result = readStream(stream, 5000);
+            }
+        } finally {
+            // Close Stream and disconnect HTTPS connection.
+            if (stream != null) {
+                stream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return result;
+    }
+    /**
+     * Converts the contents of an InputStream to a String.
+     */
+    public String readStream(InputStream stream, int maxReadSize)
+            throws IOException, UnsupportedEncodingException {
+        Reader reader = null;
+        reader = new InputStreamReader(stream, "UTF-8");
+        char[] rawBuffer = new char[maxReadSize];
+        int readSize;
+        StringBuffer buffer = new StringBuffer();
+        while (((readSize = reader.read(rawBuffer)) != -1) && maxReadSize > 0) {
+            if (readSize > maxReadSize) {
+                readSize = maxReadSize;
+            }
+            buffer.append(rawBuffer, 0, readSize);
+            maxReadSize -= readSize;
+        }
+        return buffer.toString();
+    }
+
 }
