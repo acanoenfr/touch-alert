@@ -1,4 +1,4 @@
-package fr.acanoen.touchalert;
+package fr.acanoen.touchalert.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,6 +23,7 @@ import android.support.v4.content.ContextCompat;
 
 import java.io.IOException;
 
+import fr.acanoen.touchalert.R;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;

@@ -1,4 +1,4 @@
-package fr.acanoen.touchalert;
+package fr.acanoen.touchalert.recycler;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
+
+import fr.acanoen.touchalert.R;
+import fr.acanoen.touchalert.model.Alert;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
 

@@ -1,4 +1,4 @@
-package fr.acanoen.touchalert;
+package fr.acanoen.touchalert.fragment;
 
 import android.Manifest;
 import android.content.Context;
@@ -19,10 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import fr.acanoen.touchalert.R;
+import fr.acanoen.touchalert.model.Alert;
+import fr.acanoen.touchalert.recycler.RecyclerViewAdapter;
 
 
 /**
