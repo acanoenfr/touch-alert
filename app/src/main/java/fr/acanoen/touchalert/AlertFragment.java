@@ -1,6 +1,7 @@
 package fr.acanoen.touchalert;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -8,10 +9,12 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -57,6 +60,8 @@ public class AlertFragment extends Fragment implements LocationListener {
     private String type;
     //composants de l'interface
     private ImageButton event, danger, solde, medical, cata, more;
+    private String name;
+
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
 
     private OnFragmentInteractionListener mListener;
@@ -102,6 +107,10 @@ public class AlertFragment extends Fragment implements LocationListener {
         event.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //affiche le prompt
+                showInputDialog();
+
                 // traitement, envoie l'evenement et la geolocalisation
                 sendGeo("Evénement");
             }
@@ -112,6 +121,10 @@ public class AlertFragment extends Fragment implements LocationListener {
         danger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //affiche le prompt
+                showInputDialog();
+
                 //localisation
                 sendGeo("Danger");
             }
@@ -122,6 +135,10 @@ public class AlertFragment extends Fragment implements LocationListener {
         solde.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //affiche le prompt
+                showInputDialog();
+
                 // localisation methode
                 sendGeo("Promotions");
             }
@@ -132,6 +149,10 @@ public class AlertFragment extends Fragment implements LocationListener {
         medical.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //affiche le prompt
+                showInputDialog();
+
                 //localisation methode
                 sendGeo("Santé");
             }
@@ -142,6 +163,9 @@ public class AlertFragment extends Fragment implements LocationListener {
         cata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //affiche le prompt
+                showInputDialog();
+
                 //localisation methode
                 sendGeo("Catastrophe");
             }
@@ -152,6 +176,10 @@ public class AlertFragment extends Fragment implements LocationListener {
         more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //affiche le prompt
+                showInputDialog();
+                //localisation
                 sendGeo("Autre");
             }
         });
@@ -242,7 +270,8 @@ public class AlertFragment extends Fragment implements LocationListener {
         String url = "https://dev.acanoen.fr/touchalert/public/api/alert";
 
         RequestBody body =  new FormBody.Builder()
-                .add("name", type)
+                .add("name", name)
+                .add("type", type)
                 .add("longitude", location.getLongitude()+"")
                 .add("latitude", location.getLatitude() + "")
                 .build();
@@ -267,6 +296,35 @@ public class AlertFragment extends Fragment implements LocationListener {
                 }
             }
         });
+    }
+
+
+    protected void showInputDialog(){
+
+        LayoutInflater layoutInflater = LayoutInflater.from(AlertFragment.this.getActivity());
+        View promptView =  layoutInflater.inflate(R.layout.input_dialog, null );
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AlertFragment.this.getActivity());
+        alertDialogBuilder.setView(promptView);
+
+        final EditText editText = (EditText) promptView.findViewById(R.id.edittext);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("Confirmer", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                       name = String.valueOf(editText.getText());
+
+                    }
+                })
+                .setNegativeButton("Annuler",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create an alert dialog
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
     }
 
     @Override
