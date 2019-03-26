@@ -109,10 +109,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             public void onClick(View v) {
 
                 //affiche le prompt
-                showInputDialog();
-
-                // traitement, envoie l'evenement et la geolocalisation
-                sendGeo("Evénement");
+                showInputDialog("Evénement");
             }
         });
 
@@ -123,10 +120,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             public void onClick(View v) {
 
                 //affiche le prompt
-                showInputDialog();
-
-                //localisation
-                sendGeo("Danger");
+                showInputDialog("Danger");
             }
         });
 
@@ -137,10 +131,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             public void onClick(View v) {
 
                 //affiche le prompt
-                showInputDialog();
-
-                // localisation methode
-                sendGeo("Promotions");
+                showInputDialog("Promotions");
             }
         });
 
@@ -151,10 +142,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             public void onClick(View v) {
 
                 //affiche le prompt
-                showInputDialog();
-
-                //localisation methode
-                sendGeo("Santé");
+                showInputDialog("Santé");
             }
         });
 
@@ -164,10 +152,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             @Override
             public void onClick(View v) {
                 //affiche le prompt
-                showInputDialog();
-
-                //localisation methode
-                sendGeo("Catastrophe");
+                showInputDialog("Catastrophe");
             }
         });
 
@@ -178,9 +163,7 @@ public class AlertFragment extends Fragment implements LocationListener {
             public void onClick(View v) {
 
                 //affiche le prompt
-                showInputDialog();
-                //localisation
-                sendGeo("Autre");
+                showInputDialog("Autre");
             }
         });
 
@@ -299,7 +282,7 @@ public class AlertFragment extends Fragment implements LocationListener {
     }
 
 
-    protected void showInputDialog(){
+    protected void showInputDialog(final String typeEvent){
 
         LayoutInflater layoutInflater = LayoutInflater.from(AlertFragment.this.getActivity());
         View promptView =  layoutInflater.inflate(R.layout.input_dialog, null );
@@ -313,6 +296,8 @@ public class AlertFragment extends Fragment implements LocationListener {
                     public void onClick(DialogInterface dialog, int id) {
                        name = String.valueOf(editText.getText());
 
+                        //localisation
+                        sendGeo(typeEvent);
                     }
                 })
                 .setNegativeButton("Annuler",
