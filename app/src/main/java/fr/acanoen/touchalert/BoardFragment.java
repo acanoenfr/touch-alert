@@ -16,12 +16,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -75,6 +77,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
     private LocationManager locationManager;
     private Double longitude;
     private Double latitude;
+    private Location locationUser;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -110,7 +113,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
             locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
             criteria = new Criteria();
             provider = locationManager.getBestProvider(criteria, true);
-            locationManager.requestLocationUpdates(provider, 400, 1, this);
+            locationManager.requestLocationUpdates("network", 400, 1, this);
         }
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -122,6 +125,14 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.clear();
+        Location l = new Location("Default");
+        if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            l = locationManager.getLastKnownLocation("network");
+        }
+        LatLng latLng = new LatLng(l.getLatitude(), l.getLongitude());
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+        map.animateCamera(cameraUpdate);
         new getAlerts().execute("https://dev.acanoen.fr/touchalert/public/api/alert");
 
     }
@@ -145,6 +156,7 @@ public class BoardFragment extends Fragment implements OnMapReadyCallback, Locat
 
     @Override
     public void onLocationChanged(Location location) {
+        locationUser = location;
         longitude = location.getLongitude();
         latitude = location.getLatitude();
     }
