@@ -12,10 +12,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -31,6 +33,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -53,9 +56,16 @@ public class NotificationFragment extends Fragment implements LocationListener {
     private LocationManager locationManager;
     private String provider;
 
+    private RecyclerView recyclerView;
+    private List<Alert> alertList = new ArrayList<>();
+
+    private TextView textView;
+
     // private RecyclerView mRecyclerView;
 
     private OnFragmentInteractionListener mListener;
+
+    private RecyclerViewAdapter recyclerViewAdapter;
 
     public NotificationFragment() {
         // Required empty public constructor
@@ -81,6 +91,7 @@ public class NotificationFragment extends Fragment implements LocationListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_notification, container, false);
         // Inflate the layout for this fragment
         if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -89,7 +100,12 @@ public class NotificationFragment extends Fragment implements LocationListener {
             provider = locationManager.getBestProvider(criteria, true);
             locationManager.requestLocationUpdates("network", 400, 1, this);
         }
-        return inflater.inflate(R.layout.fragment_notification, container, false);
+        recyclerView = (RecyclerView) view.findViewById(R.id.alertsList);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(), alertList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(recyclerViewAdapter);
+        textView = (TextView) view.findViewById(R.id.loader);
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -229,8 +245,9 @@ public class NotificationFragment extends Fragment implements LocationListener {
                     l.setLatitude(latitude);
                     l.setLongitude(longitude);
                     float distance = locationUser.distanceTo(l);
-
-                    //
+                    alertList.add(new Alert(alert.getString("name"), alert.getString("created_at"), R.mipmap.ic_touch_alert));
+                    recyclerViewAdapter.notifyDataSetChanged();
+                    textView.setText("Alerte à proximité");
 
                 }
             } catch (JSONException e) {
